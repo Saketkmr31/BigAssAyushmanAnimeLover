@@ -138,6 +138,11 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
         "baa-history",
         JSON.stringify([anime.slug, ...(JSON.parse(localStorage.getItem("baa-history") || "[]") as string[]).filter((x) => x !== anime.slug)].slice(0, 60))
       );
+      const historyDataRaw: unknown = JSON.parse(localStorage.getItem("baa-history-data") || "{}");
+      const historyData = historyDataRaw && typeof historyDataRaw === "object" && !Array.isArray(historyDataRaw)
+        ? historyDataRaw as Record<string, Anime> : {};
+      historyData[anime.slug] = anime;
+      localStorage.setItem("baa-history-data", JSON.stringify(historyData));
       localStorage.setItem(`baa-progress:${anime.slug}:${episode}`, JSON.stringify({
         animeSlug: anime.slug, episode, currentTime: second, duration: Number.isFinite(video.duration) ? video.duration : 0, updatedAt: Date.now()
       }));
