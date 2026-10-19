@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Eye, EyeOff, UserRoundPlus, Mail, LockKeyhole, LoaderCircle } from "lucide-react";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 export default function RegisterPage() {
  const router = useRouter();
@@ -56,5 +57,7 @@ export default function RegisterPage() {
    {error&&<p role="alert" className="rounded-xl border border-rose-400/25 bg-rose-400/10 p-3 text-sm text-rose-200">{error}</p>}
    {message&&<p role="status" className="rounded-xl border border-emerald-400/25 bg-emerald-400/10 p-3 text-sm text-emerald-200">{message}</p>}
   </form>
+  <div className="my-5 flex items-center gap-3 text-xs muted"><span className="h-px flex-1 bg-white/10"/><span>OR</span><span className="h-px flex-1 bg-white/10"/></div>
+  <GoogleAuthButton label="Sign up with Google" />
   <p className="muted mt-6 text-center text-sm">Already have an account? <Link className="text-violet-300 hover:text-violet-200" href="/login">Sign in</Link></p></div></div>;
 }
