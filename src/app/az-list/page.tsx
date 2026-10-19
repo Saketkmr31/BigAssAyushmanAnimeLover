@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
 import { ChevronDown, LoaderCircle, Search, BookOpen } from "lucide-react";
-import { useAnimeCatalog } from "@/lib/useAnimeCatalog";
 import type { Anime } from "@/lib/catalog";
 import AnimeCard from "@/components/AnimeCard";
 const letters=["#","0-9",..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
@@ -14,7 +13,6 @@ export default function AZPage() {
  const [active,setActive]=useState("A");
  const [query,setQuery]=useState("");
  const [error,setError]=useState("");
- const {items:fallback}=useAnimeCatalog();
  async function fetchPage(page:number,append:boolean){
   if(append)setLoadingMore(true);else setLoading(true);
   setError("");
@@ -28,7 +26,12 @@ export default function AZPage() {
   }catch(e){setError(e instanceof Error?e.message:"Unable to fetch alphabetic catalogue.");}
   finally{setLoading(false);setLoadingMore(false);}
  }
- useEffect(()=>{void fetchPage(1,false);},[]);
+ useEffect(()=>{
+  const requested=new URLSearchParams(window.location.search).get("letter");
+  const decoded=requested==="%23"?"#":requested;
+  if(decoded&&letters.includes(decoded.toUpperCase()))setActive(decoded==="#"?"#":decoded.toUpperCase());
+  void fetchPage(1,false);
+ },[]);
  const list=useMemo(()=>items.filter(a=>{
   const title=a.title.trim().toUpperCase();
   const letter=active==="#"?!/^[A-Z0-9]/.test(title):active==="0-9"?/^\d/.test(title):title.startsWith(active);
