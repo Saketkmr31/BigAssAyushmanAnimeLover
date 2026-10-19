@@ -43,6 +43,11 @@ export default function AnimePage({ params }: { params: Promise<{ slug: string }
     try {
       const old = JSON.parse(localStorage.getItem("baa-history") || "[]") as string[];
       localStorage.setItem("baa-history", JSON.stringify([anime.slug, ...old.filter((x) => x !== anime.slug)].slice(0, 60)));
+      const historyDataRaw: unknown = JSON.parse(localStorage.getItem("baa-history-data") || "{}");
+      const historyData = historyDataRaw && typeof historyDataRaw === "object" && !Array.isArray(historyDataRaw)
+        ? historyDataRaw as Record<string, Anime> : {};
+      historyData[anime.slug] = anime;
+      localStorage.setItem("baa-history-data", JSON.stringify(historyData));
       window.dispatchEvent(new Event("baa-history-changed"));
     } catch {}
   }, [anime]);
