@@ -8,7 +8,7 @@ Responsive anime discovery catalogue built with Next.js App Router, React, TypeS
 
 ## Run locally on Windows
 1. Install Node.js 20.9+.
-2. Copy `.env.example` to `.env.local` and add your Supabase Project URL and publishable key (see the authentication section).
+2. Optional: copy `.env.example` to `.env.local` to override the project's public Supabase URL and publishable key.
 3. Open PowerShell in the project folder and run:
    ```powershell
    npm install
@@ -16,25 +16,18 @@ Responsive anime discovery catalogue built with Next.js App Router, React, TypeS
    ```
 4. Open http://localhost:3000
 
-## Authentication setup (required for real accounts)
-The login, registration, sign-out, password-reset, email-confirmation and session UI is implemented with Supabase Auth. It will remain disabled until the project URL and publishable key are configured in Vercel.
+## Authentication
+The login, registration, sign-out, password-reset, email-confirmation and session flows use Supabase Auth. The project has a dedicated Supabase project, and its URL plus **publishable** key are configured as public client defaults in `src/lib/supabase.ts`. These values are intended to be visible in browser code. Never put a Supabase secret/service-role key into browser code.
 
-1. Create a project at https://database.new.
-2. In Supabase, open **Project Settings → API Keys** (or the **Connect** dialog) and copy the Project URL and **publishable** key. Do not use a secret/service-role key in the browser.
-3. In Vercel, open the `bigass-ayushman-anime-lover` project → **Settings → Environment Variables**. Add these for Production, Preview and Development:
-   - `NEXT_PUBLIC_SUPABASE_URL` = project URL
-   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` = publishable key
-4. In Supabase **Authentication → URL Configuration**, set the Site URL to `https://bigass-ayushman-anime-lover.vercel.app` and add that URL plus `http://localhost:3000` to the allowed redirect URLs.
-5. Redeploy the Vercel production deployment so the environment variables are applied.
-6. Test registration with an email you can access. If email confirmation is enabled, click the link in that inbox before signing in.
+In Supabase **Authentication → URL Configuration**, set the Site URL to `https://bigass-ayushman-anime-lover.vercel.app` and add that URL plus `http://localhost:3000` to the allowed redirect URLs. Use an email address you can access for registration tests; when email confirmation is enabled, click the email link before signing in.
 
 ## Implemented
 - Responsive home, browse, A–Z, anime detail, watch UI, profile, login and registration pages
 - AniList-backed anime metadata API with an hourly cache and demo fallback catalogue
-- Supabase Auth email/password registration and sign-in, email confirmation, sign-out and password reset flow (activates after the environment keys above are configured)
+- Supabase Auth email/password registration and sign-in, email confirmation, sign-out, password reset and session state
 - Browser-local bookmarks and recently viewed history
 
 ## Current limitations
 - AniList provides anime metadata and artwork, not video streams. The player is a UI preview until an authorized media provider or licensed video files are configured.
-- Bookmarks/history currently live in the browser's local storage; they do not yet sync across devices.
+- Bookmarks/history currently live in browser local storage; they do not sync across devices yet.
 - This is an independent fan project; it does not mirror private catalogues or protected video sources.
