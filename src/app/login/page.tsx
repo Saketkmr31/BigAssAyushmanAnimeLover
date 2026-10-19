@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Eye, EyeOff, LockKeyhole, Mail, ShieldCheck, LoaderCircle } from "lucide-react";
 import { getSupabaseBrowserClient, isSupabaseConfigured } from "@/lib/supabase";
 import { useAuth } from "@/components/AuthProvider";
+import GoogleAuthButton from "@/components/GoogleAuthButton";
 
 function safeNextPath() {
   if (typeof window === "undefined") return "/profile";
@@ -60,6 +61,8 @@ export default function LoginPage() {
    {error&&<p role="alert" className="rounded-xl border border-rose-400/25 bg-rose-400/10 p-3 text-sm text-rose-200">{error}</p>}
    {message&&<p role="status" className="rounded-xl border border-violet-400/30 bg-violet-500/10 p-3 text-sm text-violet-200">{message}</p>}
   </form>
+  <div className="my-5 flex items-center gap-3 text-xs muted"><span className="h-px flex-1 bg-white/10"/><span>OR CONTINUE WITH</span><span className="h-px flex-1 bg-white/10"/></div>
+  <GoogleAuthButton />
   <div className="mt-6 flex items-start gap-2 text-xs muted"><ShieldCheck size={16} className="mt-0.5 shrink-0 text-violet-300"/><span>Passwords are handled by the authentication provider, not stored by this website's own code.</span></div>
   <p className="mt-5 text-center text-sm muted">New here? <Link className="text-violet-300 hover:text-violet-200" href="/register">Create an account</Link></p></div></div>;
 }
