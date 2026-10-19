@@ -31,6 +31,7 @@ export default function HomePage() {
  const [ranking,setRanking]=useState<Anime[]>([]);
  const [rankLoading,setRankLoading]=useState(true);
  const [seasonItems,setSeasonItems]=useState<Anime[]>([]);
+ const [recentItems,setRecentItems]=useState<Anime[]>([]);
  const [upcoming,setUpcoming]=useState<Anime[]>([]);
  const [airing,setAiring]=useState<AiringAnime[]>([]);
  const [secondaryLoading,setSecondaryLoading]=useState(true);
@@ -47,11 +48,13 @@ export default function HomePage() {
   const year=new Date().getFullYear();
   Promise.all([
    fetch(`/api/anime?season=${currentSeason()}&seasonYear=${year}&sort=POPULARITY_DESC&perPage=12`).then(r=>r.ok?r.json():Promise.reject()),
+   fetch(`/api/anime?sort=UPDATED_AT_DESC&perPage=12`).then(r=>r.ok?r.json():Promise.reject()),
    fetch(`/api/anime?status=NOT_YET_RELEASED&sort=POPULARITY_DESC&perPage=12`).then(r=>r.ok?r.json():Promise.reject()),
    fetch(`/api/anime?schedule=1&days=7&perPage=12`).then(r=>r.ok?r.json():Promise.reject()),
-  ]).then(([season,coming,airingData])=>{
+  ]).then(([season,recent,coming,airingData])=>{
     if(!alive)return;
     setSeasonItems(Array.isArray(season.items)?season.items:[]);
+    setRecentItems(Array.isArray(recent.items)?recent.items:[]);
     setUpcoming(Array.isArray(coming.items)?coming.items:[]);
     setAiring(Array.isArray(airingData.items)?airingData.items:[]);
   }).catch(()=>{}).finally(()=>{if(alive)setSecondaryLoading(false)});
@@ -59,7 +62,7 @@ export default function HomePage() {
  },[]);
 
  return <>
-  <section className="hero"><div className="hero-art" aria-hidden="true"/><div className="hero-content">
+  <section className="hero"><div className={"hero-art " + ((featured?.bannerImage || featured?.coverImage) ? "has-image" : "")} style={(featured?.bannerImage || featured?.coverImage) ? { backgroundImage: 'linear-gradient(90deg,rgba(10,8,18,.12),rgba(10,8,18,.32)),url("' + (featured?.bannerImage || featured?.coverImage) + '")', backgroundSize: "cover", backgroundPosition: "center" } : undefined} aria-hidden="true"/><div className="hero-content">
    <div className="eyebrow flex items-center gap-2"><Sparkles size={15}/> Your next obsession starts here</div>
    <h1>Find your next<br/><span className="text-violet-300">anime world.</span></h1>
    <p>Discover stories, explore hidden gems, check upcoming episodes, and keep your watchlist in one place. Real titles and artwork powered by AniList.</p>
@@ -83,6 +86,7 @@ export default function HomePage() {
    {secondaryLoading?<div className="surface flex items-center gap-2 p-7 muted"><LoaderCircle size={18} className="animate-spin"/>Loading airing schedule…</div>:airing.length?<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{airing.slice(0,9).map((a,i)=><UpcomingEpisode key={`${a.slug}-${a.airingEpisode}-${i}`} anime={a}/>)}</div>:<div className="surface p-6"><p className="font-semibold">No upcoming episodes returned for this week.</p><p className="muted mt-1 text-sm">Check the full schedule or browse currently airing anime.</p><Link href="/schedule" className="btn-secondary mt-4">Open airing schedule</Link></div>}
   </section>
 
+  <AnimeSection title="Recently updated anime" items={recentItems}/>
   <AnimeSection title="Current season" items={seasonItems}/>
   <AnimeSection title="All-time favourites" items={items.slice(0,12)}/>
   <AnimeSection title="Coming soon" items={upcoming}/>
