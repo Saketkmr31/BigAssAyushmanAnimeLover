@@ -83,6 +83,7 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
     video.load();
 
     async function attachSource() {
+      if (!video) return;
       if (current.source_type === "mp4") {
         video.src = current.source_url;
         video.load();
