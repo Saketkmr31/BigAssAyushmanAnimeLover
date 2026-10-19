@@ -25,30 +25,49 @@ export default function BrowsePage() {
 
  useEffect(()=>{
   const params=new URLSearchParams(window.location.search);
-  const initialGenre=params.get("genre");
-  const initialSearch=params.get("search");
-  if(initialGenre&&genres.includes(initialGenre))setGenre(initialGenre);
+  const initialGenre=params.get("genre")||"All genres";
+  const initialSearch=params.get("search")||"";
+  const pageValue=Number(params.get("page")||1);
+  const initialPage=Number.isInteger(pageValue)&&pageValue>0?Math.min(pageValue,500):1;
+  const requestedType=params.get("type");
+  const initialType=requestedType&&formats.includes(requestedType.toUpperCase())?requestedType.toUpperCase():"All types";
+  const rawStatus=params.get("status");
+  const statusAliases:Record<string,string>={Ongoing:"RELEASING",Completed:"FINISHED",Upcoming:"NOT_YET_RELEASED"};
+  const initialStatus=rawStatus?(statusAliases[rawStatus]||rawStatus):"Any status";
+  const initialYear=params.get("year")||"Any year";
+  const requestedSort=params.get("sort");
+  const validSort=sorts.some(s=>s.value===requestedSort);
+  const initialSort=validSort?requestedSort||"POPULARITY_DESC":"POPULARITY_DESC";
+  if(genres.includes(initialGenre))setGenre(initialGenre);
   if(initialSearch)setQuery(initialSearch);
-  if(initialGenre||initialSearch) {
-   const timer=window.setTimeout(()=>void loadRemote(1,{genre:initialGenre||"All genres",query:initialSearch||""}),0);
+  if(formats.includes(initialType))setType(initialType);else if(initialType==="All types")setType(initialType);
+  if(["RELEASING","FINISHED","NOT_YET_RELEASED","CANCELLED","HIATUS"].includes(initialStatus)||initialStatus==="Any status")setStatus(initialStatus);
+  if(/^\d{4}$/.test(initialYear))setYear(initialYear);
+  setSort(initialSort);
+  const shouldLoad=initialPage>1||initialGenre!=="All genres"||Boolean(initialSearch)||Boolean(requestedType)||Boolean(rawStatus)||Boolean(params.get("year"))||Boolean(requestedSort);
+  if(shouldLoad) {
+   const timer=window.setTimeout(()=>void loadRemote(initialPage,{genre:initialGenre,query:initialSearch,type:initialType,status:initialStatus,year:initialYear,sort:initialSort}),0);
    return()=>window.clearTimeout(timer);
   }
-  // Deliberately load once for URL-supplied filters; no scrape or bulk dump.
  },[]);
 
- function buildParams(page:number, overrides?:{genre?:string;query?:string}) {
+ function buildParams(page:number, overrides?:{genre?:string;query?:string;type?:string;status?:string;year?:string;sort?:string}) {
   const selectedGenre=overrides?.genre??genre;
   const selectedQuery=overrides?.query??query;
-  const params=new URLSearchParams({page:String(page),perPage:"30",sort});
+  const selectedType=overrides?.type??type;
+  const selectedStatus=overrides?.status??status;
+  const selectedYear=overrides?.year??year;
+  const selectedSort=overrides?.sort??sort;
+  const params=new URLSearchParams({page:String(page),perPage:"30",sort:selectedSort});
   if(selectedQuery.trim())params.set("search",selectedQuery.trim());
   if(selectedGenre!=="All genres")params.set("genre",selectedGenre);
-  if(type!=="All types")params.set("format",type);
-  if(status!=="Any status")params.set("status",status);
-  if(year!=="Any year")params.set("seasonYear",year);
+  if(selectedType!=="All types")params.set("format",selectedType);
+  if(selectedStatus!=="Any status")params.set("status",selectedStatus);
+  if(selectedYear!=="Any year")params.set("seasonYear",selectedYear);
   return params.toString();
  }
 
- async function loadRemote(page:number,overrides?:{genre?:string;query?:string}) {
+ async function loadRemote(page:number,overrides?:{genre?:string;query?:string;type?:string;status?:string;year?:string;sort?:string}) {
   setSearching(true);setRequestError("");
   try {
    const response=await fetch(`/api/anime?${buildParams(page,overrides)}`);
