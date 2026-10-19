@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
-import { ChevronDown, LoaderCircle, Search, BookAlphabet } from "lucide-react";
+import { ChevronDown, LoaderCircle, Search, BookOpen } from "lucide-react";
 import { useAnimeCatalog } from "@/lib/useAnimeCatalog";
 import type { Anime } from "@/lib/catalog";
 import AnimeCard from "@/components/AnimeCard";
@@ -34,7 +34,7 @@ export default function AZPage() {
   const letter=active==="#"?!/^[A-Z0-9]/.test(title):active==="0-9"?/^\d/.test(title):title.startsWith(active);
   return letter&&(title.toLowerCase().includes(query.toLowerCase())||a.alt.toLowerCase().includes(query.toLowerCase()));
  }),[items,active,query]);
- return <><div className="mb-7"><div className="eyebrow flex items-center gap-2"><BookAlphabet size={15}/> Catalogue index</div><h1 className="mt-2 text-3xl font-black sm:text-4xl">Anime A–Z List</h1><p className="muted mt-2">Alphabetically sorted AniList catalogue. Load additional pages to reveal more titles.</p><p className="muted mt-1 text-xs">{loading?"Loading catalogue…":`${items.length.toLocaleString()} loaded${pageInfo?.total? ` of ${pageInfo.total.toLocaleString()} available titles`:""}`}</p></div>
+ return <><div className="mb-7"><div className="eyebrow flex items-center gap-2"><BookOpen size={15}/> Catalogue index</div><h1 className="mt-2 text-3xl font-black sm:text-4xl">Anime A–Z List</h1><p className="muted mt-2">Alphabetically sorted AniList catalogue. Load additional pages to reveal more titles.</p><p className="muted mt-1 text-xs">{loading?"Loading catalogue…":`${items.length.toLocaleString()} loaded${pageInfo?.total? ` of ${pageInfo.total.toLocaleString()} available titles`:""}`}</p></div>
   <label className="relative mb-5 block max-w-xl"><Search size={17} className="muted absolute left-3 top-3.5"/><input className="field pl-10" placeholder="Search loaded titles..." value={query} onChange={e=>setQuery(e.target.value)}/></label>
   <div className="mb-8 flex flex-wrap gap-2">{letters.map(l=><button key={l} type="button" onClick={()=>setActive(l)} className={`letter ${active===l?"selected":""}`}>{l}</button>)}</div>
   {error&&<div className="mb-5 rounded-xl border border-rose-400/25 bg-rose-400/10 p-4 text-sm text-rose-200" role="alert">{error}</div>}
