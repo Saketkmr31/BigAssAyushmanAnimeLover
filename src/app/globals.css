@@ -77,3 +77,26 @@ button, input, select { font: inherit; }
 .poster:has(.poster-image) .poster-badge { z-index:2; }
 .poster-bookmark { position:absolute; z-index:3; top:7px; right:7px; display:grid; place-items:center; width:31px; height:31px; border-radius:9px; border:1px solid #ffffff33; background:#09090dcc; color:white; }
 .poster-bookmark:hover { background:#7c3aed; }
+
+
+/* Use real AniList artwork in the homepage feature panel when available. */
+.hero-art.has-image {
+  transform: none;
+  opacity: .76;
+  filter: saturate(1.12);
+  background-repeat: no-repeat;
+}
+.hero-art.has-image:before,
+.hero-art.has-image:after {
+  display: none;
+}
+@media (max-width: 700px) {
+  .hero-art.has-image {
+    right: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    opacity: .19;
+    border-radius: 0;
+  }
+}
