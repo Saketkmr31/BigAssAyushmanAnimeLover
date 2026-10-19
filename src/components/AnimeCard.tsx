@@ -6,10 +6,10 @@ import BookmarkButton from "@/components/BookmarkButton";
 
 export default function AnimeCard({ anime }: { anime: Anime }) {
   return <article className="anime-card">
-    <Link href={\`/anime/\${anime.slug}\`} className="block">
+    <Link href={`/anime/${anime.slug}`} className="block">
       <div className="poster" style={{ "--poster": anime.color } as React.CSSProperties}>
         {anime.coverImage
-          ? <img className="poster-image" src={anime.coverImage} alt={\`\${anime.title} cover\`} loading="lazy" />
+          ? <img className="poster-image" src={anime.coverImage} alt={`${anime.title} cover`} loading="lazy" />
           : <span className="poster-title">{anime.title}</span>}
         <span className="poster-badge">{anime.type}</span>
       </div>
