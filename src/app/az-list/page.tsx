@@ -1,18 +1,45 @@
 "use client";
-import { useMemo, useState } from "react";
-import { ChevronDown, LoaderCircle } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronDown, LoaderCircle, Search, BookAlphabet } from "lucide-react";
 import { useAnimeCatalog } from "@/lib/useAnimeCatalog";
+import type { Anime } from "@/lib/catalog";
 import AnimeCard from "@/components/AnimeCard";
 const letters=["#","0-9",..."ABCDEFGHIJKLMNOPQRSTUVWXYZ"];
+type PageInfo={currentPage:number;hasNextPage:boolean;total?:number};
 export default function AZPage() {
- const {items,loading,loadMore,loadingMore,hasMore,totalAvailable}=useAnimeCatalog();
- const [active,setActive]=useState("A"); const [query,setQuery]=useState("");
- const list=useMemo(()=>items.filter(a=>a.title.toLowerCase().includes(query.toLowerCase())&&(active==="#"||active==="0-9"||a.title.toUpperCase().startsWith(active))),[items,active,query]);
- return <><div className="mb-7"><div className="eyebrow">Catalogue index</div><h1 className="mt-2 text-3xl font-black sm:text-4xl">Anime A–Z List</h1><p className="muted mt-2">Browse AniList titles alphabetically. Load more pages to expand the list.</p><p className="muted mt-1 text-xs">{loading?"Loading AniList catalogue…":`${items.length} titles loaded${totalAvailable? ` · ${totalAvailable.toLocaleString()} total on AniList`:""}`}</p></div>
-  <input className="field mb-5 max-w-xl" placeholder="Search loaded titles..." value={query} onChange={e=>setQuery(e.target.value)}/>
-  <div className="mb-8 flex flex-wrap gap-2">{letters.map(l=><button key={l} onClick={()=>setActive(l)} className={`letter ${active===l?"selected":""}`}>{l}</button>)}</div>
-  <div className="mb-4 flex items-center justify-between"><h2 className="section-title">Titles starting with {active}</h2><span className="muted text-sm">{list.length} titles</span></div>
-  {list.length?<div className="anime-grid">{list.map(a=><AnimeCard key={a.slug} anime={a}/>)}</div>:<div className="surface p-8 text-center muted">No loaded titles for this letter yet. Load more pages or try another letter.</div>}
-  <div className="mt-8 flex justify-center">{hasMore?<button className="btn-secondary" disabled={loading||loadingMore} onClick={()=>void loadMore()}>{loadingMore?<><LoaderCircle size={16} className="animate-spin"/> Loading more anime…</>:<><ChevronDown size={16}/> Load more anime</>}</button>:<p className="muted text-xs">End of the available catalogue pages.</p>}</div>
+ const [items,setItems]=useState<Anime[]>([]);
+ const [pageInfo,setPageInfo]=useState<PageInfo|null>(null);
+ const [loading,setLoading]=useState(true);
+ const [loadingMore,setLoadingMore]=useState(false);
+ const [active,setActive]=useState("A");
+ const [query,setQuery]=useState("");
+ const [error,setError]=useState("");
+ const {items:fallback}=useAnimeCatalog();
+ async function fetchPage(page:number,append:boolean){
+  if(append)setLoadingMore(true);else setLoading(true);
+  setError("");
+  try{
+   const r=await fetch(`/api/anime?sort=TITLE_ROMAJI&page=${page}&perPage=30`);
+   if(!r.ok)throw new Error("Couldn't fetch the alphabetic catalogue.");
+   const d=await r.json();
+   if(!Array.isArray(d.items))throw new Error("Unexpected catalogue response.");
+   setItems(old=>{if(!append)return d.items;const seen=new Set(old.map(x=>x.slug));return [...old,...d.items.filter((x:Anime)=>!seen.has(x.slug))]});
+   setPageInfo(d.pageInfo??null);
+  }catch(e){setError(e instanceof Error?e.message:"Unable to fetch alphabetic catalogue.");}
+  finally{setLoading(false);setLoadingMore(false);}
+ }
+ useEffect(()=>{void fetchPage(1,false);},[]);
+ const list=useMemo(()=>items.filter(a=>{
+  const title=a.title.trim().toUpperCase();
+  const letter=active==="#"?!/^[A-Z0-9]/.test(title):active==="0-9"?/^\d/.test(title):title.startsWith(active);
+  return letter&&(title.toLowerCase().includes(query.toLowerCase())||a.alt.toLowerCase().includes(query.toLowerCase()));
+ }),[items,active,query]);
+ return <><div className="mb-7"><div className="eyebrow flex items-center gap-2"><BookAlphabet size={15}/> Catalogue index</div><h1 className="mt-2 text-3xl font-black sm:text-4xl">Anime A–Z List</h1><p className="muted mt-2">Alphabetically sorted AniList catalogue. Load additional pages to reveal more titles.</p><p className="muted mt-1 text-xs">{loading?"Loading catalogue…":`${items.length.toLocaleString()} loaded${pageInfo?.total? ` of ${pageInfo.total.toLocaleString()} available titles`:""}`}</p></div>
+  <label className="relative mb-5 block max-w-xl"><Search size={17} className="muted absolute left-3 top-3.5"/><input className="field pl-10" placeholder="Search loaded titles..." value={query} onChange={e=>setQuery(e.target.value)}/></label>
+  <div className="mb-8 flex flex-wrap gap-2">{letters.map(l=><button key={l} type="button" onClick={()=>setActive(l)} className={`letter ${active===l?"selected":""}`}>{l}</button>)}</div>
+  {error&&<div className="mb-5 rounded-xl border border-rose-400/25 bg-rose-400/10 p-4 text-sm text-rose-200" role="alert">{error}</div>}
+  <div className="mb-4 flex items-center justify-between gap-3"><h2 className="section-title">Titles starting with {active}</h2><span className="muted text-sm">{list.length} titles in loaded pages</span></div>
+  {list.length?<div className="anime-grid">{list.map(a=><AnimeCard key={a.slug} anime={a}/>)}</div>:<div className="surface p-8 text-center"><p className="font-bold">{loading?"Loading titles…":"No matching loaded titles"}</p><p className="muted mt-2 text-sm">Try another letter, change your search, or load more alphabetic pages.</p></div>}
+  <div className="mt-8 flex justify-center">{pageInfo?.hasNextPage?<button className="btn-secondary" disabled={loading||loadingMore} onClick={()=>void fetchPage((pageInfo?.currentPage??1)+1,true)}>{loadingMore?<><LoaderCircle size={16} className="animate-spin"/> Loading more anime…</>:<><ChevronDown size={16}/> Load more anime</>}</button>:!loading?<p className="muted text-xs">End of AniList title pages.</p>:null}</div>
  </>;
 }
