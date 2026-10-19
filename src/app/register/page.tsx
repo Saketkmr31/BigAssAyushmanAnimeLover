@@ -1,0 +1,8 @@
+"use client";
+import Link from "next/link";
+import { useState } from "react";
+export default function RegisterPage() {
+ const [message,setMessage]=useState("");
+ return <div className="surface mx-auto max-w-xl p-6 sm:p-9"><div className="eyebrow">Join the community</div><h1 className="mt-2 text-3xl font-black">Create your account</h1><p className="muted mt-2 text-sm">A demo registration form for the prototype.</p>
+ <form className="mt-7 space-y-4" onSubmit={e=>{e.preventDefault();setMessage("Demo only: registration API and database are not connected yet.")}}><label className="block text-sm">Username<input className="field mt-2" required minLength={3} placeholder="Choose a username"/></label><label className="block text-sm">Email<input className="field mt-2" required type="email" placeholder="you@example.com"/></label><label className="block text-sm">Password<input className="field mt-2" required type="password" minLength={8} placeholder="At least 8 characters"/></label><label className="flex items-start gap-2 text-sm muted"><input className="mt-1" type="checkbox" required/><span>I understand this is a prototype and does not create a secure real account.</span></label><button className="btn-primary w-full">Create account</button>{message&&<p className="rounded-xl border border-violet-400/30 bg-violet-500/10 p-3 text-sm text-violet-200">{message}</p>}</form><p className="muted mt-6 text-center text-sm">Already have an account? <Link className="text-violet-300" href="/login">Sign in</Link></p></div>;
+}
