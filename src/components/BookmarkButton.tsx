@@ -17,6 +17,17 @@ function writeBookmarks(items: string[]) {
   localStorage.setItem("baa-bookmarks", JSON.stringify([...new Set(items)]));
   window.dispatchEvent(new Event("baa-bookmarks-changed"));
 }
+function readBookmarkData(): Record<string, Anime> {
+  try {
+    const raw: unknown = JSON.parse(localStorage.getItem("baa-bookmark-data") || "{}");
+    return raw && typeof raw === "object" && !Array.isArray(raw) ? raw as Record<string, Anime> : {};
+  } catch {
+    return {};
+  }
+}
+function writeBookmarkData(data: Record<string, Anime>) {
+  localStorage.setItem("baa-bookmark-data", JSON.stringify(data));
+}
 function rowFor(userId: string, anime: Anime) {
   return {
     user_id: userId,
@@ -56,6 +67,9 @@ export default function BookmarkButton({ anime, compact = false }: { anime: Anim
         if (!alive || error) return;
         if (data) {
           setSaved(true);
+          const data = readBookmarkData();
+          data[anime.slug] = anime;
+          writeBookmarkData(data);
           if (!local.includes(anime.slug)) writeBookmarks([...local, anime.slug]);
         } else if (local.includes(anime.slug)) {
           const { error: insertError } = await supabase.from("user_watchlist")
@@ -86,6 +100,9 @@ export default function BookmarkButton({ anime, compact = false }: { anime: Anim
     const wasSaved = saved;
     const next = wasSaved ? before.filter((item) => item !== anime.slug) : [...before, anime.slug];
     writeBookmarks(next);
+    const data = readBookmarkData();
+    if (wasSaved) delete data[anime.slug]; else data[anime.slug] = anime;
+    writeBookmarkData(data);
     setSaved(!wasSaved);
     try {
       const supabase = getSupabaseBrowserClient();
