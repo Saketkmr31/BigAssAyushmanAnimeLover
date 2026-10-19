@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { genres } from "@/lib/catalog";
+import { Tags, ChevronRight } from "lucide-react";
+export default function GenrePage(){return <><div className="mb-8"><div className="eyebrow flex items-center gap-2"><Tags size={15}/> Explore by theme</div><h1 className="mt-2 text-3xl font-black sm:text-4xl">Browse genres</h1><p className="muted mt-2">Choose a genre to search the live AniList catalogue.</p></div><div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">{genres.map(g=><Link key={g} href={"/browse?genre="+encodeURIComponent(g)} className="surface flex items-center justify-between gap-2 p-4 transition hover:border-violet-400/50 hover:bg-white/[0.04]"><span className="font-semibold">{g}</span><ChevronRight size={15} className="muted"/></Link>)}</div></>;}
