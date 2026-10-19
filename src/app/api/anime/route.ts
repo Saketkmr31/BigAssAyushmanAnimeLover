@@ -155,10 +155,19 @@ export async function GET(request: NextRequest) {
 
     const isSingle = Number.isInteger(id) && id > 0;
     const query = isSingle ? DETAIL_QUERY : LIST_QUERY;
-    const variables = isSingle ? { id } : {
-      search: search || null, page, perPage, sort: [sort], genre_in: genre ? [genre] : null,
-      format_in: format ? [format] : null, status, season, seasonYear, type: "ANIME", isAdult: false,
-    };
+    const variables: Record<string, unknown> = isSingle
+      ? { id }
+      : { page, perPage, sort: [sort], type: "ANIME", isAdult: false };
+    if (!isSingle) {
+      // AniList has returned HTTP 500 when nullable filter variables are sent explicitly as null.
+      // Omitting unused filters preserves the API's default behaviour and keeps browse/search reliable.
+      if (search) variables.search = search;
+      if (genre) variables.genre_in = [genre];
+      if (format) variables.format_in = [format];
+      if (status) variables.status = status;
+      if (season) variables.season = season;
+      if (seasonYear) variables.seasonYear = seasonYear;
+    }
     const response = await fetch(ENDPOINT, {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
