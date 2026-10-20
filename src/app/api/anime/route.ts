@@ -120,7 +120,7 @@ export async function GET(request: NextRequest) {
   const days = Math.max(1, Math.min(14, Number(params.get("days") || "7") || 7));
   const sort = enumValue(params.get("sort"), [
     "TRENDING_DESC", "POPULARITY_DESC", "SCORE_DESC", "UPDATED_AT_DESC",
-    "START_DATE_DESC", "START_DATE", "FAVOURITES_DESC", "TITLE_ROMAJI",
+    "START_DATE_DESC", "START_DATE", "FAVOURITES_DESC", "TITLE_ROMAJI", "TITLE_ENGLISH",
   ]) || "POPULARITY_DESC";
   const genre = (params.get("genre") || "").trim().slice(0, 40);
   const format = enumValue(params.get("format"), ["TV", "TV_SHORT", "MOVIE", "OVA", "ONA", "SPECIAL", "MUSIC"]);
