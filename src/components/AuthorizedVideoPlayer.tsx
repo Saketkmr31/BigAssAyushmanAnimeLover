@@ -5,6 +5,21 @@ import { ExternalLink, LoaderCircle, Play, ShieldCheck, VideoOff, Youtube } from
 import type { Anime } from "@/lib/catalog";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
+function youtubeVideoId(rawUrl: string) {
+  try {
+    const url = new URL(rawUrl);
+    const host = url.hostname.toLowerCase();
+    let id = "";
+    if (host === "youtu.be") id = url.pathname.split("/").filter(Boolean)[0] || "";
+    else if (["youtube.com", "www.youtube.com", "m.youtube.com", "youtube-nocookie.com", "www.youtube-nocookie.com"].includes(host)) {
+      if (url.pathname === "/watch") id = url.searchParams.get("v") || "";
+      else id = url.pathname.match(/^\/(?:embed|shorts|live)\/([\w-]{11})/)?.[1] || "";
+    }
+    return /^[\w-]{11}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
 type EpisodeSource = {
   id: string;
   provider_name: string;
@@ -28,6 +43,11 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
   const animeKey = String(anime.id ?? anime.slug);
   const current = sources[sourceIndex] ?? null;
   const trailer = anime.trailer && anime.trailer.site?.toLowerCase() === "youtube" && anime.trailer.id && /^[\w-]{6,20}$/.test(anime.trailer.id) ? anime.trailer : null;
+  const episodeLabelPattern = new RegExp("\\b(?:episode|ep\\.?|e)\\s*#?\\s*0?" + episode + "(?!\\d)\\b", "i");
+  const officialEpisode = (anime.streamingEpisodes || []).find((entry) =>
+    episodeLabelPattern.test(entry.title) && entry.site.toLowerCase().includes("youtube") && youtubeVideoId(entry.url)
+  ) || null;
+  const officialEpisodeVideoId = officialEpisode ? youtubeVideoId(officialEpisode.url) : null;
 
   useEffect(() => {
     let alive = true;
@@ -178,6 +198,26 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
     return <div className="player-screen flex items-center justify-center gap-3"><LoaderCircle size={20} className="animate-spin text-violet-300" />Checking authorised video sources…</div>;
   }
 
+  if (!sources.length && officialEpisode && officialEpisodeVideoId) {
+    return <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="inline-flex items-center gap-2 font-semibold"><Play size={16} className="text-violet-300" /> Official episode stream</span>
+        <span className="muted text-xs">Episode {episode} · {officialEpisode.site}</span>
+      </div>
+      <div className="overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "16 / 9" }}>
+        <iframe
+          className="h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/${officialEpisodeVideoId}`}
+          title={`${anime.title} — ${officialEpisode.title}`}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      </div>
+      <p className="muted text-xs">Embedded from an official YouTube episode link listed by AniList. Playback is controlled by YouTube.</p>
+    </div>;
+  }
   if (error && !sources.length) {
     return <div className="player-screen flex flex-col items-center justify-center p-6 text-center">
       <VideoOff size={34} className="text-violet-300" />
