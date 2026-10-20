@@ -21,7 +21,7 @@ export default function AuthCallbackPage() {
       const params = new URLSearchParams(window.location.search);
       const providerError = params.get("error_description") || params.get("error");
       if (providerError) {
-        if (alive) setError(decodeURIComponent(providerError.replace(/\+/g, " ")));
+        if (alive) setError(providerError);
         return;
       }
 
