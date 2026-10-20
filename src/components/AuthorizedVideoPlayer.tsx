@@ -218,11 +218,21 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
 
   if (current?.source_type === "embed") {
     return <div className="space-y-3">
-      {sources.length > 1 && <label className="flex flex-wrap items-center gap-3 text-sm muted">Video server
-        <select className="field !w-auto !py-2" value={sourceIndex} onChange={(event) => { setSourceIndex(Number(event.target.value)); setError(""); }}>
-          {sources.map((source, index) => <option key={source.id} value={index}>{source.provider_name} · {source.language} · {source.quality}</option>)}
-        </select>
-      </label>}
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold">Video server</p>
+          <p className="muted mt-1 text-xs">Choose an approved provider source</p>
+        </div>
+        {sources.length > 1 && <div className="flex flex-wrap gap-2">
+          {sources.map((source, index) => <button
+            key={source.id}
+            type="button"
+            onClick={() => { setSourceIndex(index); setError(""); }}
+            className={`btn-secondary !px-3 !py-2 text-xs ${sourceIndex === index ? "!border-violet-400/70 !bg-violet-500/20 !text-white" : ""}`}
+            aria-pressed={sourceIndex === index}
+          >{source.provider_name || `Server ${index + 1}`}</button>)}
+        </div>}
+      </div>
       <div className="overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "16 / 9" }}>
         <iframe
           key={current.id}
