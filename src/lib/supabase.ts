@@ -9,6 +9,20 @@ const SUPABASE_URL =
 const SUPABASE_PUBLISHABLE_KEY =
   process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || "sb_publishable_iau4261v7VaQQVs077PajA_E9Tv86zn";
 
+export async function isGoogleProviderEnabled(): Promise<boolean | null> {
+  try {
+    const response = await fetch(`${SUPABASE_URL}/auth/v1/settings`, {
+      headers: { apikey: SUPABASE_PUBLISHABLE_KEY },
+      cache: "no-store",
+    });
+    if (!response.ok) return null;
+    const settings = await response.json();
+    return typeof settings?.external?.google === "boolean" ? settings.external.google : null;
+  } catch {
+    return null;
+  }
+}
+
 export function isSupabaseConfigured(): boolean {
   return Boolean(SUPABASE_URL && SUPABASE_PUBLISHABLE_KEY);
 }
