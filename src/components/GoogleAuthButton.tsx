@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import { LoaderCircle } from "lucide-react";
-import { getSupabaseBrowserClient } from "@/lib/supabase";
+import { getSupabaseBrowserClient, isGoogleProviderEnabled } from "@/lib/supabase";
 
 function explainGoogleError(message: string) {
   const text = message.toLowerCase();
@@ -28,6 +28,11 @@ export default function GoogleAuthButton({ label = "Continue with Google" }: { l
 
     setBusy(true);
     try {
+      const providerEnabled = await isGoogleProviderEnabled();
+      if (providerEnabled === false) {
+        setError("Google sign-in is not enabled in this Supabase project yet. The site cannot enable it without the Google OAuth client ID and client secret.");
+        return;
+      }
       const redirectTo = new URL("/auth/callback?next=%2Fprofile", window.location.origin).toString();
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
         provider: "google",
