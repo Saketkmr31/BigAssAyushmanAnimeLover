@@ -15,7 +15,7 @@ query AnimeCatalogue(
       type: $type, search: $search, sort: $sort, genre_in: $genre_in,
       format_in: $format_in, status: $status, season: $season,
       seasonYear: $seasonYear, isAdult: $isAdult
-    ) { ${CORE_FIELDS} }
+    ) { ${CORE_FIELDS} externalLinks { id url site type language color icon } trailer { id site thumbnail } }
   }
 }`;
 const DETAIL_QUERY = `query AnimeById($id: Int) { Media(id: $id, type: ANIME) { ${DETAIL_FIELDS} } }`;
