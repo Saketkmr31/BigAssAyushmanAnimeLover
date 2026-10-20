@@ -17,7 +17,7 @@ export default function AZPage() {
   if(append)setLoadingMore(true);else setLoading(true);
   setError("");
   try{
-   const r=await fetch(`/api/anime?sort=TITLE_ROMAJI&page=${page}&perPage=30`);
+   const r=await fetch(`/api/anime?sort=TITLE_ENGLISH&page=${page}&perPage=30`);
    if(!r.ok)throw new Error("Couldn't fetch the alphabetic catalogue.");
    const d=await r.json();
    if(!Array.isArray(d.items))throw new Error("Unexpected catalogue response.");
