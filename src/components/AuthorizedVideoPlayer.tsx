@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ExternalLink, LoaderCircle, Play, ShieldCheck, VideoOff } from "lucide-react";
+import { ExternalLink, LoaderCircle, Play, ShieldCheck, VideoOff, Youtube } from "lucide-react";
 import type { Anime } from "@/lib/catalog";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
@@ -27,6 +27,7 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
 
   const animeKey = String(anime.id ?? anime.slug);
   const current = sources[sourceIndex] ?? null;
+  const trailer = anime.trailer && anime.trailer.site?.toLowerCase() === "youtube" && anime.trailer.id && /^[\\w-]{6,20}$/.test(anime.trailer.id) ? anime.trailer : null;
 
   useEffect(() => {
     let alive = true;
@@ -185,11 +186,32 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
     </div>;
   }
 
+  if (!sources.length && trailer) {
+    return <div className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <span className="inline-flex items-center gap-2 font-semibold"><Youtube size={17} className="text-violet-300" /> Official trailer preview</span>
+        <span className="muted text-xs">Trailer only — not episode {episode}</span>
+      </div>
+      <div className="overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "16 / 9" }}>
+        <iframe
+          className="h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/${trailer.id}`}
+          title={`${anime.title} official trailer preview`}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      </div>
+      <p className="muted text-xs">This anime has no verified full-episode source registered. The preview is an official YouTube trailer listed by AniList.</p>
+    </div>;
+  }
+
   if (!sources.length) {
     return <div className="player-screen flex flex-col items-center justify-center p-6 text-center">
       <div className="mb-4 grid h-16 w-16 place-items-center rounded-full bg-violet-600/80"><Play size={26} fill="currentColor" /></div>
       <h2 className="text-lg font-bold">Episode {episode}</h2>
-      <p className="muted mt-2 max-w-lg text-sm">No licensed MP4/HLS source is registered for this episode yet. Once an approved source is added to the anime database, this player will play it here.</p>
+      <p className="muted mt-2 max-w-lg text-sm">No licensed MP4/HLS source is registered for this episode yet. Use an official provider link below when available; full-episode playback activates only after an approved source is registered.</p>
       <div className="mt-4 inline-flex items-center gap-2 text-xs text-emerald-300"><ShieldCheck size={14} /> Only verified, licensed sources appear in this player</div>
     </div>;
   }
