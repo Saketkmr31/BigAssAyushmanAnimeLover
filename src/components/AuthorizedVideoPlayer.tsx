@@ -27,7 +27,7 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
 
   const animeKey = String(anime.id ?? anime.slug);
   const current = sources[sourceIndex] ?? null;
-  const trailer = anime.trailer && anime.trailer.site?.toLowerCase() === "youtube" && anime.trailer.id && /^[\\w-]{6,20}$/.test(anime.trailer.id) ? anime.trailer : null;
+  const trailer = anime.trailer && anime.trailer.site?.toLowerCase() === "youtube" && anime.trailer.id && /^[\w-]{6,20}$/.test(anime.trailer.id) ? anime.trailer : null;
 
   useEffect(() => {
     let alive = true;
