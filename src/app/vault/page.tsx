@@ -167,8 +167,6 @@ export default function VaultPage() {
       const name = profileName.trim().slice(0, 40);
       const result = await supabase.from("vault_profiles").upsert({ user_id: user.id, display_name: name, bio: profileBio.trim().slice(0, 240), updated_at: new Date().toISOString() });
       if (result.error) throw result.error;
-      const memberUpdate = await supabase.from("vault_members").update({ display_name: name }).eq("user_id", user.id);
-      if (memberUpdate.error) throw memberUpdate.error;
       setNotice("Profile saved."); await refreshVault();
     } catch (e) { setError(e instanceof Error ? e.message : "Could not save your profile."); }
     finally { setBusy(false); }
