@@ -216,11 +216,42 @@ export default function AuthorizedVideoPlayer({ anime, episode }: { anime: Anime
     </div>;
   }
 
-  if (current?.source_type === "embed" || current?.source_type === "external") {
+  if (current?.source_type === "embed") {
+    return <div className="space-y-3">
+      {sources.length > 1 && <label className="flex flex-wrap items-center gap-3 text-sm muted">Video server
+        <select className="field !w-auto !py-2" value={sourceIndex} onChange={(event) => { setSourceIndex(Number(event.target.value)); setError(""); }}>
+          {sources.map((source, index) => <option key={source.id} value={index}>{source.provider_name} · {source.language} · {source.quality}</option>)}
+        </select>
+      </label>}
+      <div className="overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "16 / 9" }}>
+        <iframe
+          key={current.id}
+          className="h-full w-full"
+          src={current.source_url}
+          title={`${anime.title} Episode ${episode} — ${current.provider_name}`}
+          allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+        />
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-xs">
+        <span className="inline-flex items-center gap-1 text-emerald-300"><ShieldCheck size={13} /> Approved embed: {current.provider_name}</span>
+        <a className="muted inline-flex items-center gap-1 underline" href={current.source_url} target="_blank" rel="noopener noreferrer">Open in new tab <ExternalLink size={13}/></a>
+      </div>
+      <p className="muted text-xs">Playback controls, subtitles and quality are managed by this approved provider's embedded player.</p>
+    </div>;
+  }
+
+  if (current?.source_type === "external") {
     return <div className="player-screen flex flex-col items-center justify-center p-6 text-center">
       <ExternalLink size={30} className="text-violet-300" />
       <h2 className="mt-3 font-bold">{current.provider_name}</h2>
-      <p className="muted mt-2 max-w-md text-sm">This provider is external and doesn't expose a direct in-player file. Open the provider to watch there.</p>
+      <p className="muted mt-2 max-w-md text-sm">This provider opens its own official watch page rather than exposing an embeddable player.</p>
+      {sources.length > 1 && <label className="mt-4 flex flex-wrap items-center justify-center gap-3 text-sm muted">Video server
+        <select className="field !w-auto !py-2" value={sourceIndex} onChange={(event) => { setSourceIndex(Number(event.target.value)); setError(""); }}>
+          {sources.map((source, index) => <option key={source.id} value={index}>{source.provider_name} · {source.language} · {source.quality}</option>)}
+        </select>
+      </label>}
       <a className="btn-primary mt-4" href={current.source_url} target="_blank" rel="noopener noreferrer">Open official source <ExternalLink size={15} /></a>
     </div>;
   }
