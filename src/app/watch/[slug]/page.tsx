@@ -49,9 +49,10 @@ export default function WatchPage({ params }: { params: Promise<{ slug: string }
           <div className="w-full px-2 pt-10"><AuthorizedVideoPlayer anime={anime} episode={episode} /></div>
         </div>
         <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Link className="btn-secondary" href={"/watch/" + anime.slug + "-episode-" + Math.max(1, episode - 1)}><ChevronLeft size={16} /> Previous</Link>
             <Link className="btn-primary" href={"/watch/" + anime.slug + "-episode-" + (episode + 1)}>Next <ChevronRight size={16} /></Link>
+            <a className="btn-secondary" href={"https://www.crunchyroll.com/search?q=" + encodeURIComponent(anime.title)} target="_blank" rel="noopener noreferrer"><ExternalLink size={15} /> Find on Crunchyroll</a>
           </div>
           <button className="btn-secondary" onClick={() => setLight(!light)}><Lightbulb size={16} />{light ? "Lights on" : "Lights off"}</button>
         </div>
