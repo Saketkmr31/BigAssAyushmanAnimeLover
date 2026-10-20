@@ -110,6 +110,7 @@ export default function AnimePage({ params }: { params: Promise<{ slug: string }
         <div className="mt-4 flex flex-wrap gap-2">{anime.genre.map((g) => <Link className="pill transition hover:border-violet-400 hover:text-white" href={`/browse?genre=${encodeURIComponent(g)}`} key={g}>{g}</Link>)}</div>
         <div className="mt-7 flex flex-wrap gap-3">
           <Link className="btn-primary" href={`/watch/${anime.slug}-episode-1`}><Play size={17} fill="currentColor" /> Open episode 1</Link>
+          <a className="btn-secondary" href={"https://www.crunchyroll.com/search?q=" + encodeURIComponent(anime.title)} target="_blank" rel="noopener noreferrer"><ExternalLink size={15} /> Find on Crunchyroll</a>
           <BookmarkButton anime={anime} />
           <button className="btn-secondary" onClick={shareAnime}><Share2 size={16} /> Share</button>
         </div>
